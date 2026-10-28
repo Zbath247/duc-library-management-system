@@ -5,6 +5,8 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
+import db from './src/config/db.js';
+import { runSeed } from './src/db/seed.js';
 import { authenticate, purgeExpiredSessions } from './src/middleware/auth.js';
 import authRoutes from './src/routes/auth.js';
 import usersRoutes from './src/routes/users.js';
@@ -16,12 +18,29 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isVercel = Boolean(process.env.VERCEL);
 
 // Ensure runtime directories exist
-const uploadDir = path.join(__dirname, 'public', 'uploads');
-const backupsDir = path.join(__dirname, 'backups');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-if (!fs.existsSync(backupsDir)) fs.mkdirSync(backupsDir, { recursive: true });
+const uploadDir = isVercel ? path.join('/tmp', 'uploads') : path.join(__dirname, 'public', 'uploads');
+const backupsDir = isVercel ? path.join('/tmp', 'backups') : path.join(__dirname, 'backups');
+
+try {
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+  if (!fs.existsSync(backupsDir)) fs.mkdirSync(backupsDir, { recursive: true });
+} catch (err) {
+  console.warn('[Server] Directory creation warning:', err.message);
+}
+
+// Auto-initialize SQLite database if empty (ensures Vercel cold starts have data)
+try {
+  const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").get();
+  if (!tableCheck) {
+    console.log('[DB] Initializing database tables and seed data...');
+    runSeed();
+  }
+} catch (err) {
+  console.error('[DB Setup Error]', err);
+}
 
 // Core middleware
 app.use(express.json({ limit: '10mb' }));
@@ -33,7 +52,9 @@ app.use(authenticate);
 
 // Static assets
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(uploadDir));
+if (fs.existsSync(uploadDir)) {
+  app.use('/uploads', express.static(uploadDir));
+}
 
 // API Routes
 app.use('/api/auth', authRoutes);
@@ -43,6 +64,7 @@ app.use('/api/users', usersRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
+    environment: isVercel ? 'vercel-serverless' : 'standalone-node',
     timestamp: new Date().toISOString(),
     user: req.user ? { id: req.user.id, username: req.user.username, role: req.user.role } : null
   });
@@ -70,15 +92,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Clean up expired sessions periodically (every 6 hours)
-setInterval(purgeExpiredSessions, 6 * 60 * 60 * 1000);
+let server = null;
+if (!isVercel) {
+  // Clean up expired sessions periodically (every 6 hours) on standalone server
+  setInterval(purgeExpiredSessions, 6 * 60 * 60 * 1000);
 
-const server = app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(` DUC Library Management System is running on port ${PORT}`);
-  console.log(` Local URL: http://localhost:${PORT}`);
-  console.log(`=======================================================`);
-});
+  server = app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(` DUC Library Management System is running on port ${PORT}`);
+    console.log(` Local URL: http://localhost:${PORT}`);
+    console.log(`=======================================================`);
+  });
+}
 
 export default app;
 export { server };

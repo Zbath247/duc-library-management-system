@@ -18,7 +18,9 @@
     "management-system"
   ],
   "author": "Digital University of Cambodia",
-  "license": "ISC",
+  "engines": {
+    "node": ">=22.x"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",

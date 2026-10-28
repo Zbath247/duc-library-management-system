@@ -5,20 +5,31 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const dbPath = process.env.DATABASE_PATH || './data/duc_library.db';
+const isVercel = Boolean(process.env.VERCEL);
+const dbPath = isVercel 
+  ? path.join('/tmp', 'duc_library.db')
+  : (process.env.DATABASE_PATH || './data/duc_library.db');
+
 const resolvedPath = path.resolve(process.cwd(), dbPath);
 const dir = path.dirname(resolvedPath);
 
 if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir, { recursive: true });
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+  } catch (err) {
+    console.warn('[DB] Could not create directory:', dir, err.message);
+  }
 }
 
 export const db = new DatabaseSync(resolvedPath);
 
-// Enable WAL mode and foreign key enforcement
-db.exec(`
-  PRAGMA journal_mode = WAL;
-  PRAGMA foreign_keys = ON;
-`);
+// Enable WAL mode or foreign keys
+try {
+  db.exec(`
+    PRAGMA foreign_keys = ON;
+  `);
+} catch (e) {
+  console.warn('[DB PRAGMA Warning]', e.message);
+}
 
 export default db;
