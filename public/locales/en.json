@@ -1,0 +1,53 @@
+{
+  "app": {
+    "title": "DUC Library",
+    "university_name": "Digital University of Cambodia",
+    "library_system": "Library Management System",
+    "academic_portal": "Academic Knowledge Portal",
+    "search_placeholder": "Search books by title, author, category or ISBN...",
+    "search_button": "Search Catalogue",
+    "logout": "Log out",
+    "login": "Log in",
+    "quick_login": "Quick Login Demo Accounts"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "books": "Books",
+    "members": "Members",
+    "loans": "Borrow & Return",
+    "checkin": "Daily Attendance",
+    "reports": "Reports & Analytics",
+    "settings": "Settings",
+    "staff_accounts": "Staff Accounts",
+    "my_loans": "My Loans & History"
+  },
+  "auth": {
+    "sign_in_title": "Sign In to DUC Library",
+    "sign_in_subtitle": "Select your account or enter your credentials",
+    "username": "Username",
+    "password": "Password",
+    "admin_role": "Admin",
+    "librarian_role": "Librarian",
+    "member_role": "Member",
+    "login_button": "Sign In",
+    "logged_in_as": "Logged in as",
+    "role": "Role",
+    "card_number": "Card No"
+  },
+  "common": {
+    "status": "Status",
+    "actions": "Actions",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "success": "Success",
+    "error": "Error",
+    "loading": "Loading...",
+    "no_data": "No records found",
+    "all": "All",
+    "active": "Active",
+    "suspended": "Suspended"
+  }
+}

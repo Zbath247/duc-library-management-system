@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="km" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Digital University of Cambodia (DUC) Library Management System - Academic catalogue, borrowing, reader attendance, and digital resources.">
+  <title data-i18n="app.university_name">Digital University of Cambodia - Library Management System</title>
+  
+  <link rel="icon" type="image/png" href="/logo.png">
+  
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/layout.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+  <!-- Top Utilities Bar -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--duc-gold-light); font-weight: 600;">
+        <span>🏛️</span>
+        <span data-i18n="app.university_name">សាកលវិទ្យាល័យឌីជីថលកម្ពុជា</span>
+      </span>
+    </div>
+    <div class="top-bar-right">
+      <!-- User Profile / Session Status -->
+      <div id="user-profile-area"></div>
+
+      <!-- Auth Action Button -->
+      <button id="auth-btn" class="btn btn-gold btn-sm" data-i18n="app.login">ចូលប្រើ</button>
+
+      <!-- Language Switcher -->
+      <div style="display: flex; gap: 0.25rem;">
+        <button id="lang-km-btn" class="btn btn-gold btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;">ខ្មែរ</button>
+        <button id="lang-en-btn" class="btn btn-outline btn-sm" style="padding: 0.25rem 0.6rem; font-size: 0.8rem; color: #cbd5e1;">EN</button>
+      </div>
+
+      <!-- Dark / Light Mode Toggle -->
+      <button id="theme-toggle-btn" class="btn btn-outline btn-sm" style="color: #cbd5e1;" title="Toggle Theme">
+        🌙
+      </button>
+    </div>
+  </header>
+
+  <!-- Large Hero Header -->
+  <section class="hero-header">
+    <div class="hero-inner">
+      <div class="hero-branding">
+        <img src="/logo.png" alt="DUC Crest Logo" class="hero-logo" id="main-duc-logo">
+        <div class="hero-titles">
+          <div class="hero-univ-km" data-i18n="app.university_name">សាកលវិទ្យាល័យឌីជីថលកម្ពុជា</div>
+          <div class="hero-univ-en">DIGITAL UNIVERSITY OF CAMBODIA</div>
+          <h1 class="hero-lib-title" data-i18n="app.library_system">ប្រព័ន្ធគ្រប់គ្រងបណ្ណាល័យ</h1>
+        </div>
+      </div>
+
+      <!-- Large Centered Search Box -->
+      <div class="hero-search-container">
+        <form class="hero-search-form" id="hero-search-form" onsubmit="event.preventDefault();">
+          <div class="hero-search-icon">🔍</div>
+          <input 
+            type="text" 
+            class="hero-search-input" 
+            id="global-search-input"
+            data-i18n-placeholder="app.search_placeholder"
+            placeholder="ស្វែងរកសៀវភៅតាមចំណងជើង អ្នកនិពន្ធ ប្រភេទ ឬលេខ ISBN..."
+            autocomplete="off"
+          >
+          <button type="submit" class="hero-search-btn" id="hero-search-submit">
+            <span data-i18n="app.search_button">ស្វែងរកកាតាឡុក</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pill-shaped Tab Navigation Overlapping Hero Edge -->
+  <nav class="nav-pill-wrapper">
+    <div class="nav-pill-bar" id="nav-pills-container">
+      <!-- Rendered dynamically based on authenticated role -->
+    </div>
+  </nav>
+
+  <!-- Main Application Content Area -->
+  <main class="main-content" id="main-content">
+    <div id="phase-content-area">
+      <!-- Dynamic phase view rendered by app.js -->
+    </div>
+  </main>
+
+  <!-- University Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div style="font-weight: 600; color: var(--duc-gold-light);">
+        <span data-i18n="app.university_name">សាកលវិទ្យាល័យឌីជីថលកម្ពុជា</span> &bull; Digital University of Cambodia
+      </div>
+      <div>
+        DUC Central Library &bull; Phnom Penh, Kingdom of Cambodia &bull; <span data-i18n="app.academic_portal">ច្រកទ្វារចំណេះដឹងសិក្សាស្រាវជ្រាវ</span>
+      </div>
+      <div style="font-size: 0.8rem; color: #64748b;">
+        &copy; 2026 Digital University of Cambodia. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Login Modal Dialog -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="auth.sign_in_title">ចូលប្រើប្រព័ន្ធបណ្ណាល័យ DUC</h3>
+        <button class="modal-close" id="auth-modal-close">&times;</button>
+      </div>
+
+      <div class="alert-banner alert-error" id="login-error" style="display: none;"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-username" data-i18n="auth.username">ឈ្មោះគណនី</label>
+          <input type="text" id="login-username" class="form-input" required autocomplete="username" placeholder="admin, librarian, student1">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password" data-i18n="auth.password">ពាក្យសម្ងាត់</label>
+          <input type="password" id="login-password" class="form-input" required autocomplete="current-password" placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="login-submit-btn">
+          <span data-i18n="auth.login_button">ចូលប្រព័ន្ធ</span>
+        </button>
+      </form>
+
+      <!-- Quick Login Helper Pills -->
+      <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;" data-i18n="app.quick_login">
+          ចូលរហ័សគណនីគំរូ (Demo Accounts)
+        </div>
+        <div class="quick-login-grid">
+          <div class="quick-login-card" data-quick-user="admin" data-quick-pass="admin123">
+            <div class="quick-login-role" style="color: var(--duc-gold-dark);">Admin</div>
+            <div class="quick-login-user">admin</div>
+          </div>
+          <div class="quick-login-card" data-quick-user="librarian" data-quick-pass="lib123">
+            <div class="quick-login-role" style="color: #0284c7;">Librarian</div>
+            <div class="quick-login-user">librarian</div>
+          </div>
+          <div class="quick-login-card" data-quick-user="student1" data-quick-pass="student123">
+            <div class="quick-login-role" style="color: #10b981;">Student</div>
+            <div class="quick-login-user">student1</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Bootstrap -->
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
